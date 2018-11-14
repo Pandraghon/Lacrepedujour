@@ -76,12 +76,6 @@ function timer_60min (  )
 	/* Si un message doit POP */
 	if ( new Date().getHours() == g_bot_hour )
 	{
-		
-	}
-	
-	/* Sinon */
-	else
-	{
 		/* Récupération d'un nom de fichier */
 		l_file = generate_file_name ( );
 		
@@ -91,6 +85,12 @@ function timer_60min (  )
 		/* Affichage de la date courante */
 		console.log ( 'Une crêpe (' + l_file [ 2 ] + ') envoyée à ' + new Date().getHours() + ' heures et ' + new Date().getMinutes() + ' minutes.' );
 	}
+	
+	/* Sinon */
+	else
+	{
+		/* Ne rien faire */
+	}
 }
 
 /* ********************************************************************************************************************************** */
@@ -99,7 +99,7 @@ function timer_60min (  )
 client.on( 'ready', () => {
   
   /* Démarrage de l'application ... */
-  console.log( 'Lecture du répertoire de données ... ' ); /*client.user.setStatus('idle')*/
+  console.log( 'Lecture du répertoire de données ... ' ); 
   
   /* Récupération des fichiers disponibles */
   fs = require( 'fs' );
@@ -118,13 +118,16 @@ client.on('message', p_message => {
   /* Si une commande de démarrage est lancée */
   if ( ( p_message.content == "!=crepe,=start" ) && ( g_bot_init != 1 ) )
   {
+	  /* Suppression du message entrant */
+	  p_message.delete ( );
+	  
 	  /* Basculement de la variable */
 	  g_bot_init = 1;
 	  
 	  /* Déclenchement d'une fonction temporisée */  
-	  g_bot_interval = setInterval ( timer_60min, 60000 ); 
+	  g_bot_interval = setInterval ( timer_60min, 3600000 ); 
 	  
-      /* Enregistrement du channel de travail */
+          /* Enregistrement du channel de travail */
 	  g_bot_channel = p_message.channel;
 	  
 	  /* Affichage d'un message */
@@ -134,6 +137,9 @@ client.on('message', p_message => {
   /* Sinon si une commande d'arrêt est lancée */
   else if ( ( p_message.content == "!=crepe,=stop" ) && ( g_bot_init == 1 ) )
   {
+	  /* Suppression du message entrant */
+	  p_message.delete ( );
+	  
 	  /* Basculement de la variable */
 	  g_bot_init = 0;
 	  
