@@ -125,7 +125,7 @@ client.on('message', p_message => {
 		  g_bot_init = 1;
 
 		  /* Déclenchement d'une fonction temporisée */  
-		  g_bot_interval = setInterval ( timer_60min, 3600000 ); 
+		  g_bot_interval = setInterval ( timer_60min, 5400000 ); 
 
 		  /* Enregistrement du channel de travail */
 		  g_bot_channel = p_message.channel;
