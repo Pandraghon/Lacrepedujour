@@ -115,40 +115,44 @@ client.on( 'ready', () => {
 /* Message Event */
 client.on('message', p_message => {
   
-  /* Si une commande de démarrage est lancée */
-  if ( ( p_message.content == "!=crepe,=start" ) && ( g_bot_init != 1 ) )
+  /* Si Mac a lancé la commande */	
+  if ( p_message.author.id === "283332409070452737" )
   {
-	  /* Suppression du message entrant */
-	  p_message.delete ( );
-	  
-	  /* Basculement de la variable */
-	  g_bot_init = 1;
-	  
-	  /* Déclenchement d'une fonction temporisée */  
-	  g_bot_interval = setInterval ( timer_60min, 3600000 ); 
-	  
-          /* Enregistrement du channel de travail */
-	  g_bot_channel = p_message.channel;
-	  
-	  /* Affichage d'un message */
-	  p_message.channel.send ( "Crêpes en cours de préparation ..." );
+	  /* Si une commande de démarrage est lancée */
+	  if ( ( p_message.content == "!=crepe,=start" ) && ( g_bot_init != 1 ) )
+	  {
+		  /* Basculement de la variable */
+		  g_bot_init = 1;
+
+		  /* Déclenchement d'une fonction temporisée */  
+		  g_bot_interval = setInterval ( timer_60min, 3600000 ); 
+
+		  /* Enregistrement du channel de travail */
+		  g_bot_channel = p_message.channel;
+
+		  /* Affichage d'un message */
+		  p_message.channel.send ( "Crêpes en cours de préparation ..." );
+	  }
+
+	  /* Sinon si une commande d'arrêt est lancée */
+	  else if ( ( p_message.content == "!=crepe,=stop" ) && ( g_bot_init == 1 ) )
+	  {
+		  /* Basculement de la variable */
+		  g_bot_init = 0;
+
+		  /* Arrêt du timer */  
+		  clearInterval ( g_bot_interval ); 
+
+		  /* Affichage d'un message */
+		  p_message.channel.send ( "Arrêt du service !" );
+	  }	  
+
+	  /* Sinon */
+	  else
+	  {
+		  /* Ne rien faire */
+	  }
   }
-  
-  /* Sinon si une commande d'arrêt est lancée */
-  else if ( ( p_message.content == "!=crepe,=stop" ) && ( g_bot_init == 1 ) )
-  {
-	  /* Suppression du message entrant */
-	  p_message.delete ( );
-	  
-	  /* Basculement de la variable */
-	  g_bot_init = 0;
-	  
-	  /* Arrêt du timer */  
-	  clearInterval ( g_bot_interval ); 
-	  
-	  /* Affichage d'un message */
-	  p_message.channel.send ( "Arrêt du service !" );
-  }	  
   
   /* Sinon */
   else
