@@ -318,6 +318,18 @@ function bot_cmd_stop ( p_message )
 
 /* ********************************************************************************************************************************** */
 
+function bot_cmd_date ( p_cmd, p_message )
+{
+	if ( /^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/.test ( p_cmd [1] ) )
+	{
+		p_message.channel.send ("OK");
+	}
+	
+	else p_message.channel.send ("KO");
+}
+
+/* ********************************************************************************************************************************** */
+
 /* Message Event */
 client.on('message', p_message => {
   
@@ -342,7 +354,14 @@ client.on('message', p_message => {
 			{
 				/* Lançement commane stop */
 				bot_cmd_stop ( p_message )
-			}	
+			}
+			
+			/* Sinon si une commande d'arrêt est lancée */
+			else if ( ( l_cmd [0] == "date" ) )
+			{
+				/* Lançement commane date */
+				bot_cmd_date ( l_cmd, p_message )
+			}
 
 			/* Sinon */
 			else
