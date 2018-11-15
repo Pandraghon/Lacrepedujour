@@ -287,7 +287,14 @@ client.on('message', p_message => {
 		  {
 			/* Ne rien faire */	  
 		  }
-	  }	  
+	  }	
+	  
+	  /* Sinon si une commande d'arrêt est lancée */
+	  else if ( ( p_message.content == "!=crepe,=oli" ) )
+	  {
+		  /* Transmission de l'image */
+		  p_message.channel.send ( { files: [ { attachment: 'spec/oli.jpg', name: 'oli.jpg' } ] } );
+	  }
 
 	  /* Sinon */
 	  else
