@@ -208,7 +208,7 @@ function bot_check_remove_channel ( p_channel )
 {
 	/* Détermination du nombre de channel existant */
 	g_bot_channel_length = g_bot_channel.length;
-	
+
 	/* Parcours des canaux référencés */
 	for ( l_channel_counter = 0 ; l_channel_counter < g_bot_channel_length ; l_channel_counter++ )
 	{
@@ -217,18 +217,18 @@ function bot_check_remove_channel ( p_channel )
 		{
 			/* Suppression de l'élément */
 			g_bot_channel.splice( l_channel_counter, 1 )
-			
+
 			/* Retour */
 			return 1;
 		}
-		
+
 		/* Sinon */
 		else
 		{
 			/* Ne rien faire */
 		}
 	}
-	
+
 	/* Retour */
 	return 0;
 }
@@ -239,129 +239,124 @@ function bot_check_remove_channel ( p_channel )
 /* Ready Event */
 client.on( 'ready', () => {
   
-  /* Démarrage de l'application ... */
-  console.log( 'Lecture du répertoire de données ... ' ); 
-  
-  /* Récupération des fichiers disponibles */
-  fs = require( 'fs' );
-  g_file_liste = fs.readdirSync( 'img' );
-  
-  /* Fin init */
-  console.log( 'Terminée !' );
+	/* Démarrage de l'application ... */
+	console.log( 'Lecture du répertoire de données ... ' ); 
+
+	/* Récupération des fichiers disponibles */
+	fs = require( 'fs' );
+	g_file_liste = fs.readdirSync( 'img' );
+
+	/* Fin init */
+	console.log( 'Terminée !' );
   
 });
+
+/* ********************************************************************************************************************************** */
+
+function bot_cmd_start ( p_message )
+{
+	/* Si le canal n'est pas référencé */
+	if ( bot_check_channel ( p_message.channel ) == 1 )
+	{
+	/* Affichage d'un message */
+	p_message.channel.send ( "Crêpes en cours de préparation ..." );
+
+	/* Ajout d'un nouveau canal de travail */
+	g_bot_channel.push( p_message.channel );
+
+	/* Si le nombre de canal est égale à 1 */
+	if ( g_bot_channel.length == 1 )
+	{
+		/* Déclenchement d'une fonction temporisée */  
+		g_bot_interval = setInterval ( bot_timer_60min, 60000 ); 	
+	}
+
+	/* Sinon */
+	else
+	{
+		/* Ne rien faire */
+	}
+	}
+
+	/* Sinon */
+	else
+	{
+	  /* Ne rien faire */
+	}
+}
+
+/* ********************************************************************************************************************************** */
+
+function bot_cmd_stop ( p_message )
+{
+	/* Suppression du canal s'il existe */
+	if ( bot_check_remove_channel ( p_message.channel ) == 1 )
+	{
+	/* Affichage d'un message */
+	p_message.channel.send ( "Arrêt du service !" );
+	}
+
+	/* Sinon */
+	else
+	{
+	/* Ne rien faire */	  
+	}
+
+	/* Arrêt du timer si plus aucun channel n'est référencé */
+	if ( g_bot_channel.length == 0 )
+	{
+	/* Arrêt du timer */  
+	clearInterval ( g_bot_interval );   
+	}
+
+	/* Sinon */
+	else
+	{
+	/* Ne rien faire */	  
+	}
+}
 
 /* ********************************************************************************************************************************** */
 
 /* Message Event */
 client.on('message', p_message => {
   
-  /* Si une commande à destination du bot est disponible */
-  if ( bot_incoming_command_available ( p_message ) == 1 )
-  {
-	  /* Récupération des attributs de la commande */
-	  l_cmd = bot_incoming_command_get ( p_message );
-	  
-	  /* Commande superviseur */	
-	  if ( p_message.author.id === "283332409070452737" )
-	  {
-		  /* Si une commande de démarrage est lancée */
-		  if ( ( l_cmd [0] == "start" ) )
-		  {
-			  /* Si le canal n'est pas référencé */
-			  if ( bot_check_channel ( p_message.channel ) == 1 )
-			  {
-				/* Affichage d'un message */
-				p_message.channel.send ( "Crêpes en cours de préparation ..." );
+	/* Si une commande à destination du bot est disponible */
+	if ( bot_incoming_command_available ( p_message ) == 1 )
+	{
+		/* Récupération des attributs de la commande */
+		l_cmd = bot_incoming_command_get ( p_message );
 
-				/* Ajout d'un nouveau canal de travail */
-				g_bot_channel.push( p_message.channel );
+		/* Commande superviseur */	
+		if ( p_message.author.id === "283332409070452737" )
+		{
+			/* Si une commande de démarrage est lancée */
+			if ( ( l_cmd [0] == "start" ) )
+			{
+				/* Lançement commande start */
+				bot_cmd_start ( p_message );
+			}
 
-				/* Si le nombre de canal est égale à 1 */
-				if ( g_bot_channel.length == 1 )
-				{
-					/* Déclenchement d'une fonction temporisée */  
-					g_bot_interval = setInterval ( bot_timer_60min, 60000 ); 	
-				}
+			/* Sinon si une commande d'arrêt est lancée */
+			else if ( ( l_cmd [0] == "stop" ) )
+			{
+				/* Lançement commane stop */
+				bot_cmd_stop ( p_message )
+			}	
 
-				/* Sinon */
-				else
-				{
-					/* Ne rien faire */
-				}
-			  }
-
-			  /* Sinon */
-			  else
-			  {
-				  /* Ne rien faire */
-			  }
-		  }
-
-		  /* Sinon si une commande d'arrêt est lancée */
-		  else if ( ( l_cmd [0] == "stop" ) )
-		  {
-			  /* Suppression du canal s'il existe */
-			  if ( bot_check_remove_channel ( p_message.channel ) == 1 )
-			  {
-				/* Affichage d'un message */
-				p_message.channel.send ( "Arrêt du service !" );
-			  }
-
-			  /* Sinon */
-			  else
-			  {
-				/* Ne rien faire */	  
-			  }
-
-			  /* Arrêt du timer si plus aucun channel n'est référencé */
-			  if ( g_bot_channel.length == 0 )
-			  {
-				/* Arrêt du timer */  
-				clearInterval ( g_bot_interval );   
-			  }
-
-			  /* Sinon */
-			  else
-			  {
-				/* Ne rien faire */	  
-			  }
-		  }	
-
-		  /* Sinon */
-		  else
-		  {
+			/* Sinon */
+			else
+			{
 			  /* Ne rien faire */
-		  }
-	  }
-
-	  /* Sinon */
-	  else
-	  {
-		  /* Ne rien faire */
-	  }	
-
-	  /* ********************************************************************************************************************* */	
-
-	  if ( ( l_cmd [0]  == "date" ) )
-	  {
-
-	  }
-
-	  /* Sinon si une commande d'arrêt est lancée */
-	  if ( ( l_cmd [0] = "oli" ) )
-	  {
-		  /* Transmission de l'image */
-		  p_message.channel.send ( "command disabled"/*{ files: [ { attachment: 'spec/oli.jpg', name: 'oli.jpg' } ] } */ );
-	  }	
-
-	  /* Sinon */
-	  else
-	  {
-		  /* Ne rien faire */
-	  }
-  }
-  	
+			}
+		}
+		
+		/* Sinon */
+		else
+		{
+			/* Ne rien faire */	
+		}
+	}
 });
 
 /* ********************************************************************************************************************************** */
