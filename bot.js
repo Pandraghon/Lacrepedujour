@@ -117,7 +117,7 @@ function bot_timer_60min (  )
 	l_bot_channel_length = g_bot_channel.length;
 	
 	/* S'il est temps d'émettre un message */
-	if ( bot_is_time ( g_bot_hour, g_bot_minutes )
+	if ( bot_is_time ( g_bot_hour, g_bot_minutes ) )
 	{
 		/* Récupération d'un nom de fichier */
 		l_file = bot_generate_file_name ( );
