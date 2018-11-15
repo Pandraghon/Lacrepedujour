@@ -143,7 +143,7 @@ function bot_check_remove_channel ( p_channel )
 		if ( g_bot_channel [ l_channel_counter ] == p_channel )
 		{
 			/* Suppression de l'élément */
-			g_bot_channel.splice( 0, 1 )
+			g_bot_channel.splice( l_channel_counter, 1 )
 			
 			/* Retour */
 			return 1;
