@@ -35,24 +35,24 @@ const g_bot_ext = ".jpg"
 /* Déclaration d'une variable stockant le nom des fichiers */
 var g_file_liste = 0;
 
-/* Déclaration d'une variable stockant l'intervalle du timer */
-var g_bot_interval = 0;
-
 /* Déclaration d'une variable stockant l'état du bot ( initialisé <1> ou non <0> ) */
 var g_bot_init = 0;
 
 /* Déclaration d'une fonction stockant un timer [ms] */
 var g_bot_timer = 60000;
 
-/* Déclaration d'une fonction stockant le canal de travail */
-var g_bot_channel = 0;
+/* Déclaration d'une fonction stockant les canals de travail */
+var g_bot_channel = [];
+
+/* Déclaration d'une variable référençant les timers */
+var g_bot_timer = [];
 
 /* Déclaration d'une fonction stockant l'heure de pop du message */
-var g_bot_hour = 7;
+var g_bot_hour = 6;
 
 /* ********************************************************************************************************************************** */
 
-function generate_file_name ( )
+function bot_generate_file_name ( )
 {
 	/* Déclaration de la variable de retour */
 	l_result = ["", ""];
@@ -71,19 +71,26 @@ function generate_file_name ( )
 
 /* ********************************************************************************************************************************** */
 
-function timer_60min (  )
+function bot_timer_60min (  )
 {
-	/* Si un message doit POP */
-	if ( new Date().getHours() == g_bot_hour )
+	/* Détermination du nombre de channel existant */
+	l_bot_channel_length = g_bot_channel.length;
+	
+	/* S'il est temps d'émettre un message */
+	if ( 1/*new Date().getHours() == g_bot_hour*/ )
 	{
 		/* Récupération d'un nom de fichier */
-		l_file = generate_file_name ( );
+		l_file = bot_generate_file_name ( );
 		
-		/* Transmission de l'image */
-		g_bot_channel.send ( { files: [ { attachment: l_file [ 0 ], name: l_file [ 1 ] } ] } );
+		/* Pour le nombre de serveur à déservir */
+		for ( l_channel_counter = 0 ; l_channel_counter < l_bot_channel_length ; l_channel_counter++ )
+		{
+			/* Transmission de l'image */
+			g_bot_channel [ l_channel_counter ].send ( { files: [ { attachment: l_file [ 0 ], name: l_file [ 1 ] } ] } );
 		
-		/* Affichage de la date courante */
-		console.log ( 'Une crêpe (' + l_file [ 2 ] + ') envoyée à ' + new Date().getHours() + ' heures et ' + new Date().getMinutes() + ' minutes.' );
+			/* Affichage de la date courante */
+			console.log ( 'Une crêpe (' + l_file [ 2 ] + ') envoyée à ' + new Date().getHours() + ' heures et ' + new Date().getMinutes() + ' minutes. [chn=' + g_bot_channel [ l_channel_counter ] + '].' );
+		}
 	}
 	
 	/* Sinon */
@@ -92,6 +99,67 @@ function timer_60min (  )
 		/* Ne rien faire */
 	}
 }
+
+
+/* ********************************************************************************************************************************** */
+
+function bot_check_channel ( p_channel )
+{
+	/* Détermination du nombre de channel existant */
+	l_bot_channel_length = g_bot_channel.length;
+	
+	/* Parcours des canaux référencés */
+	for ( l_channel_counter = 0 ; l_channel_counter < l_bot_channel_length ; l_channel_counter++ )
+	{
+		/* Si le canal est déjà référencé */
+		if ( g_bot_channel [ l_channel_counter ] == p_channel )
+		{
+			/* Retour */
+			return 0;
+		}
+		
+		/* Sinon */
+		else
+		{
+			/* Ne rien faire */
+		}
+	}
+	
+	/* Retour */
+	return 1;
+}
+
+/* ********************************************************************************************************************************** */
+
+function bot_check_remove_channel ( p_channel )
+{
+	/* Détermination du nombre de channel existant */
+	g_bot_channel_length = g_bot_channel.length;
+	
+	/* Parcours des canaux référencés */
+	for ( l_channel_counter = 0 ; l_channel_counter < g_bot_channel_length ; l_channel_counter++ )
+	{
+		/* Si le canal est référencé */
+		if ( g_bot_channel [ l_channel_counter ] == p_channel )
+		{
+			/* Suppression de l'élément */
+			g_bot_channel.splice( 0, 1 )
+			
+			/* Retour */
+			return 1;
+		}
+		
+		/* Sinon */
+		else
+		{
+			/* Ne rien faire */
+		}
+	}
+	
+	/* Retour */
+	return 0;
+}
+
 
 /* ********************************************************************************************************************************** */
 
@@ -119,32 +187,66 @@ client.on('message', p_message => {
   if ( p_message.author.id === "283332409070452737" )
   {
 	  /* Si une commande de démarrage est lancée */
-	  if ( ( p_message.content == "!=crepe,=start" ) && ( g_bot_init != 1 ) )
+	  if ( ( p_message.content == "!=crepe,=start" ) )
 	  {
-		  /* Basculement de la variable */
-		  g_bot_init = 1;
-
-		  /* Déclenchement d'une fonction temporisée */  
-		  g_bot_interval = setInterval ( timer_60min, 3600000 ); 
-
-		  /* Enregistrement du channel de travail */
-		  g_bot_channel = p_message.channel;
-
-		  /* Affichage d'un message */
-		  p_message.channel.send ( "Crêpes en cours de préparation ..." );
+		  /* Si le canal n'est pas référencé */
+		  if ( bot_check_channel ( p_message.channel ) == 1 )
+		  {
+			/* Affichage d'un message */
+		  	p_message.channel.send ( "Crêpes en cours de préparation ..." );
+			  
+			/* Ajout d'un nouveau canal de travail */
+			g_bot_channel.push( p_message.channel );
+			  
+			/* Si le nombre de canal est égale à 1 */
+			if ( g_bot_channel.length == 1 )
+			{
+				/* Déclenchement d'une fonction temporisée */  
+		  		g_bot_interval = setInterval ( bot_timer_60min, 30000 ); 	
+			}
+			  
+			/* Sinon */
+			else
+			{
+				/* Ne rien faire */
+			}
+		  }
+		  
+		  /* Sinon */
+		  else
+		  {
+			  /* Ne rien faire */
+		  }
 	  }
 
 	  /* Sinon si une commande d'arrêt est lancée */
-	  else if ( ( p_message.content == "!=crepe,=stop" ) && ( g_bot_init == 1 ) )
+	  else if ( ( p_message.content == "!=crepe,=stop" ) )
 	  {
-		  /* Basculement de la variable */
-		  g_bot_init = 0;
-
-		  /* Arrêt du timer */  
-		  clearInterval ( g_bot_interval ); 
-
-		  /* Affichage d'un message */
-		  p_message.channel.send ( "Arrêt du service !" );
+		  /* Suppression du canal s'il existe */
+		  if ( bot_check_remove_channel ( p_channel ) == 1 )
+		  {
+			/* Affichage d'un message */
+		  	p_message.channel.send ( "Arrêt du service !" );
+		  }
+		  
+		  /* Sinon */
+		  else
+		  {
+			/* Ne rien faire */	  
+		  }
+		  
+		  /* Arrêt du timer si plus aucun channel n'est référencé */
+		  if ( g_bot_channel.length == 0 )
+		  {
+			/* Arrêt du timer */  
+		  	clearInterval ( g_bot_interval );   
+		  }
+		  
+		  /* Sinon */
+		  else
+		  {
+			/* Ne rien faire */	  
+		  }
 	  }	  
 
 	  /* Sinon */
