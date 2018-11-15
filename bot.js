@@ -223,7 +223,7 @@ client.on('message', p_message => {
 	  else if ( ( p_message.content == "!=crepe,=stop" ) )
 	  {
 		  /* Suppression du canal s'il existe */
-		  if ( bot_check_remove_channel ( p_channel ) == 1 )
+		  if ( bot_check_remove_channel ( p_message.channel ) == 1 )
 		  {
 			/* Affichage d'un message */
 		  	p_message.channel.send ( "Arrêt du service !" );
