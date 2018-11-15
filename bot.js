@@ -48,7 +48,13 @@ var g_bot_channel = [];
 var g_bot_timer = [];
 
 /* Déclaration d'une fonction stockant l'heure de pop du message */
-var g_bot_hour = 6;
+var g_bot_hour = 17;
+
+/* Déclaration d'une variable stockant la minute de pop du message */
+g_bot_minutes = 0;
+
+/* Déclaration d'un verrou générale */
+var g_bot_lock = 0;
 
 /* ********************************************************************************************************************************** */
 
@@ -71,13 +77,47 @@ function bot_generate_file_name ( )
 
 /* ********************************************************************************************************************************** */
 
+function bot_is_time ( p_hour, p_minute )
+{
+	/* Si il est temps de transmettre un message */
+	if ( ( new Date().getHours() == p_hour ) && ( new Date().getMinutes() >= p_minute ) && ( g_bot_lock == 0 ) )
+	{
+		/* Actualisation du verrou global */
+		g_bot_lock = 1;
+		
+		/* Retour */
+		return 1;
+	}
+	
+	/* Sinon si un message a été transmis et l'heure suivante est apparue */
+	else if ( ( new Date().getHours() != p_hour ) && ( g_bot_lock == 1 ) )
+	{
+		/* Actualisation du verrou global */
+		g_bot_lock = 0;
+		
+		/* Retour */
+		return 0;
+	}
+	
+	/* Sinon */
+	else
+	{
+		/* Ne rien faire */
+	}
+	
+	/* Retour */
+	return 0;
+}
+
+/* ********************************************************************************************************************************** */
+
 function bot_timer_60min (  )
 {
 	/* Détermination du nombre de channel existant */
 	l_bot_channel_length = g_bot_channel.length;
 	
 	/* S'il est temps d'émettre un message */
-	if ( 1/*new Date().getHours() == g_bot_hour*/ )
+	if ( bot_is_time ( g_bot_hour, g_bot_minutes )
 	{
 		/* Récupération d'un nom de fichier */
 		l_file = bot_generate_file_name ( );
@@ -202,7 +242,7 @@ client.on('message', p_message => {
 			if ( g_bot_channel.length == 1 )
 			{
 				/* Déclenchement d'une fonction temporisée */  
-		  		g_bot_interval = setInterval ( bot_timer_60min, 30000 ); 	
+		  		g_bot_interval = setInterval ( bot_timer_60min, 60000 ); 	
 			}
 			  
 			/* Sinon */
