@@ -334,7 +334,7 @@ function bot_cmd_date ( p_cmd, p_message )
 		g_bot_minutes = parseInt ( l_date [ 1 ], 10 );
 		
 		/* Affichage d'un message */
-		p_message.channel.send ("Ouverture de la crêperie à " + l_date[0] + " heures et " + l_date[1] + " minutes (UTC) !" );
+		p_message.channel.send ("Ouverture de la crêperie à " + g_bot_hour + " heures et " + g_bot_minutes + " minutes (UTC) !" );
 	}
 	
 	else 
