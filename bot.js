@@ -19,7 +19,7 @@ const g_bot_name   = "La crêpe du Jour !";
 const g_bot_id   = '512333371729379331';
 
 /* Déclaration du préfix des commandes */
-const g_bot_cmd = "!=crp,=";
+const g_bot_cmd = "!=crepe,=";
 
 /* Déclaration du répertoire contenant les fichiers */
 const g_bot_path = "img/"
@@ -55,6 +55,39 @@ g_bot_minutes = 0;
 
 /* Déclaration d'un verrou générale */
 var g_bot_lock = 0;
+
+/* ********************************************************************************************************************************** */
+
+/* Cette fonction vérifie si un message pour Jerry est présent */
+function bot_incoming_command_available ( p_message )
+{
+	/* Si une commande pour Jerry est présente */
+	if ( ( p_message.author.id != g_bot_id ) && ( p_message.content.substring( 0, 9 ) === g_bot_cmd ) ) 
+	{
+		/* Retour OK */
+		return 1;
+	}
+	
+	/* Retour KO */
+	return 0;
+}
+
+/* ********************************************************************************************************************************** */
+
+/* Cette fonction retourne la commande et son argument */
+function bot_incoming_command_get ( p_message )
+{
+	/* Séparation de la chaine de caractère */
+	var l_msg = p_message.content.substring( 0 ).split( ",=" );
+		
+	/* Récupération des attributs de la commande */
+	l_cmd  = l_msg [1];
+	l_arg1 = l_msg [2];
+	l_arg2 = l_msg [3];
+	
+	/* Retour */
+	return [l_cmd, l_arg1, l_arg2];
+}
 
 /* ********************************************************************************************************************************** */
 
@@ -223,35 +256,78 @@ client.on( 'ready', () => {
 /* Message Event */
 client.on('message', p_message => {
   
-  /* Si Mac a lancé la commande */	
-  if ( p_message.author.id === "283332409070452737" )
+  /* Si une commande à destination du bot est disponible */
+  if ( bot_incoming_command_available ( p_message ) == 1 )
   {
-	  /* Si une commande de démarrage est lancée */
-	  if ( ( p_message.content == "!=crepe,=start" ) )
+	  /* Récupération des attributs de la commande */
+	  l_cmd = bot_incoming_command_get ( p_message );
+	  
+	  /* Commande superviseur */	
+	  if ( p_message.author.id === "283332409070452737" )
 	  {
-		  /* Si le canal n'est pas référencé */
-		  if ( bot_check_channel ( p_message.channel ) == 1 )
+		  /* Si une commande de démarrage est lancée */
+		  if ( ( l_cmd [0] == "start" ) )
 		  {
-			/* Affichage d'un message */
-		  	p_message.channel.send ( "Crêpes en cours de préparation ..." );
-			  
-			/* Ajout d'un nouveau canal de travail */
-			g_bot_channel.push( p_message.channel );
-			  
-			/* Si le nombre de canal est égale à 1 */
-			if ( g_bot_channel.length == 1 )
-			{
-				/* Déclenchement d'une fonction temporisée */  
-		  		g_bot_interval = setInterval ( bot_timer_60min, 60000 ); 	
-			}
-			  
-			/* Sinon */
-			else
-			{
-				/* Ne rien faire */
-			}
+			  /* Si le canal n'est pas référencé */
+			  if ( bot_check_channel ( p_message.channel ) == 1 )
+			  {
+				/* Affichage d'un message */
+				p_message.channel.send ( "Crêpes en cours de préparation ..." );
+
+				/* Ajout d'un nouveau canal de travail */
+				g_bot_channel.push( p_message.channel );
+
+				/* Si le nombre de canal est égale à 1 */
+				if ( g_bot_channel.length == 1 )
+				{
+					/* Déclenchement d'une fonction temporisée */  
+					g_bot_interval = setInterval ( bot_timer_60min, 60000 ); 	
+				}
+
+				/* Sinon */
+				else
+				{
+					/* Ne rien faire */
+				}
+			  }
+
+			  /* Sinon */
+			  else
+			  {
+				  /* Ne rien faire */
+			  }
 		  }
-		  
+
+		  /* Sinon si une commande d'arrêt est lancée */
+		  else if ( ( l_cmd [0] == "stop" ) )
+		  {
+			  /* Suppression du canal s'il existe */
+			  if ( bot_check_remove_channel ( p_message.channel ) == 1 )
+			  {
+				/* Affichage d'un message */
+				p_message.channel.send ( "Arrêt du service !" );
+			  }
+
+			  /* Sinon */
+			  else
+			  {
+				/* Ne rien faire */	  
+			  }
+
+			  /* Arrêt du timer si plus aucun channel n'est référencé */
+			  if ( g_bot_channel.length == 0 )
+			  {
+				/* Arrêt du timer */  
+				clearInterval ( g_bot_interval );   
+			  }
+
+			  /* Sinon */
+			  else
+			  {
+				/* Ne rien faire */	  
+			  }
+		  }	
+
 		  /* Sinon */
 		  else
 		  {
@@ -259,34 +335,24 @@ client.on('message', p_message => {
 		  }
 	  }
 
-	  /* Sinon si une commande d'arrêt est lancée */
-	  else if ( ( p_message.content == "!=crepe,=stop" ) )
+	  /* Sinon */
+	  else
 	  {
-		  /* Suppression du canal s'il existe */
-		  if ( bot_check_remove_channel ( p_message.channel ) == 1 )
-		  {
-			/* Affichage d'un message */
-		  	p_message.channel.send ( "Arrêt du service !" );
-		  }
-		  
-		  /* Sinon */
-		  else
-		  {
-			/* Ne rien faire */	  
-		  }
-		  
-		  /* Arrêt du timer si plus aucun channel n'est référencé */
-		  if ( g_bot_channel.length == 0 )
-		  {
-			/* Arrêt du timer */  
-		  	clearInterval ( g_bot_interval );   
-		  }
-		  
-		  /* Sinon */
-		  else
-		  {
-			/* Ne rien faire */	  
-		  }
+		  /* Ne rien faire */
+	  }	
+
+	  /* ********************************************************************************************************************* */	
+
+	  if ( ( l_cmd [0]  == "date" ) )
+	  {
+
+	  }
+
+	  /* Sinon si une commande d'arrêt est lancée */
+	  if ( ( l_cmd [0] = "oli" ) )
+	  {
+		  /* Transmission de l'image */
+		  p_message.channel.send ( "command disabled"/*{ files: [ { attachment: 'spec/oli.jpg', name: 'oli.jpg' } ] } */ );
 	  }	
 
 	  /* Sinon */
@@ -294,25 +360,6 @@ client.on('message', p_message => {
 	  {
 		  /* Ne rien faire */
 	  }
-  }
-  
-  /* Sinon */
-  else
-  {
-	  /* Ne rien faire */
-  }	
-	
-  /* Sinon si une commande d'arrêt est lancée */
-  if ( ( p_message.content == "!=crepe,=oli" ) )
-  {
-	  /* Transmission de l'image */
-	  p_message.channel.send ( "command disabled"/*{ files: [ { attachment: 'spec/oli.jpg', name: 'oli.jpg' } ] } */ );
-  }	
-  
-  /* Sinon */
-  else
-  {
-	  /* Ne rien faire */
   }
   	
 });
