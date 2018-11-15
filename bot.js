@@ -39,7 +39,7 @@ var g_file_liste = 0;
 var g_bot_init = 0;
 
 /* Déclaration d'une fonction stockant un timer [ms] */
-var g_bot_timer = 60000;
+var g_bot_timer = 20000;
 
 /* Déclaration d'une fonction stockant les canals de travail */
 var g_bot_channel = [];
@@ -48,7 +48,7 @@ var g_bot_channel = [];
 var g_bot_timer = [];
 
 /* Déclaration d'une fonction stockant l'heure de pop du message */
-var g_bot_hour = 17;
+var g_bot_hour = 6;
 
 /* Déclaration d'une variable stockant la minute de pop du message */
 var g_bot_minutes = 0;
@@ -113,7 +113,7 @@ function bot_generate_file_name ( )
 function bot_is_time ( p_hour, p_minute )
 {
 	/* Si il est temps de transmettre un message */
-	if ( ( new Date().getHours() == p_hour ) && ( new Date().getMinutes() >= p_minute ) && ( g_bot_lock == 0 ) )
+	if ( ( new Date().getHours() == p_hour ) && ( new Date().getMinutes() == p_minute ) && ( g_bot_lock == 0 ) )
 	{
 		/* Actualisation du verrou global */
 		g_bot_lock = 1;
@@ -253,7 +253,7 @@ client.on( 'ready', () => {
 
 /* ********************************************************************************************************************************** */
 
-function bot_cmd_start ( p_message )
+function bot_cmd_start ( p_cmd, p_message )
 {
 	/* Si le canal n'est pas référencé */
 	if ( bot_check_channel ( p_message.channel ) == 1 )
@@ -268,7 +268,7 @@ function bot_cmd_start ( p_message )
 	if ( g_bot_channel.length == 1 )
 	{
 		/* Déclenchement d'une fonction temporisée */  
-		g_bot_interval = setInterval ( bot_timer_60min, 60000 ); 	
+		g_bot_interval = setInterval ( bot_timer_60min, g_bot_timer ); 	
 	}
 
 	/* Sinon */
@@ -287,7 +287,7 @@ function bot_cmd_start ( p_message )
 
 /* ********************************************************************************************************************************** */
 
-function bot_cmd_stop ( p_message )
+function bot_cmd_stop ( p_cmd, p_message )
 {
 	/* Suppression du canal s'il existe */
 	if ( bot_check_remove_channel ( p_message.channel ) == 1 )
@@ -361,14 +361,14 @@ client.on('message', p_message => {
 			if ( ( l_cmd [0] == "start" ) )
 			{
 				/* Lançement commande start */
-				bot_cmd_start ( p_message );
+				bot_cmd_start ( l_cmd, p_message );
 			}
 
 			/* Sinon si une commande d'arrêt est lancée */
 			else if ( ( l_cmd [0] == "stop" ) )
 			{
 				/* Lançement commane stop */
-				bot_cmd_stop ( p_message )
+				bot_cmd_stop ( l_cmd, p_message )
 			}
 			
 			/* Sinon si une commande d'arrêt est lancée */
