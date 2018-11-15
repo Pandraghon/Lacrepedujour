@@ -323,6 +323,9 @@ function bot_cmd_date ( p_cmd, p_message )
 	/* Si la chaine de caratères est valide */
 	if ( /^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/.test ( p_cmd [1] ) )
 	{
+		/* Réinitialisation du verrou */
+		g_bot_lock = 0;
+		
 		/* Déconcaténation de de la date */
 		l_date = p_cmd[1].split (':');
 		
@@ -331,7 +334,7 @@ function bot_cmd_date ( p_cmd, p_message )
 		g_bot_minutes = parseInt ( l_date [ 0 ], 10 );
 		
 		/* Affichage d'un message */
-		p_message.channel.send ("Réouverture de la crêperie à " + l_date[0] + " heures et " + l_date[1] + " minutes !" );
+		p_message.channel.send ("Réouverture de la crêperie à " + l_date[0] + " heures et " + l_date[1] + " minutes (UTC) !" );
 	}
 	
 	else 
